@@ -61,8 +61,12 @@ class Triangle(Renderable):
     	self.normal = (self.v2 - self.v1).cross(self.v3 - self.v3).norm()
 
     def intersect(self, origin, direction): 
-    	if(self.direction)
-
+    	if(direction.dot(self.normal) <= 0.00001 && direction.dot(self.normal) >= -0.00001): return None  
+    	len = - self.normal.dot(v1 - origin) / (self.normal.dot(direction))
+    	p = origin + p * direction
+    	u = v2 - v1
+    	v = v3 - v1
+    	
     # Should return the normal at the given location
     def normal(self, location):
     	return self.normal
