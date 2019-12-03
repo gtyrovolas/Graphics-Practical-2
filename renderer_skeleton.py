@@ -26,20 +26,29 @@ class Sphere(Renderable):
     # should return a RayIntersection representing the point where
     # the input ray intersects the sphere
     def intersect(self, origin, direction):
-        #
-        # ! implement this
-        #
-        
-        return RayIntersection(origin, direction, self, intersection, ray_length)
-
+        a = direction.dot(direction)
+        b = 2 * direction.dot(origin - self.origin)
+        c = (origin - self.origin).dot(origin - self.origin) - self.radius * self.radius
+        D = b * b - 4 * a * c
+        len = 0
+        intersection = origin
+        if(D >= 0):
+        	x1 = (-b + math.sqrt(D)) / (2*a)
+        	x2 = (-b - math.sqrt(D)) / (2*a)
+        	len = min(x1,x2)
+        	if(len < 0): len = max(x1,x2)
+        else:
+        	len = -1
+        if(len >= 0):
+        	intersection = len * direction + origin
+        if(len < 0):
+        	return None;
+        return RayIntersection(origin, direction, self, intersection, len)
     # location (vec3) is a point on the sphere
     # 
     # should return a vec3 representing the normal at that point
     def normal(self, location):
-        #
-        # ! implement this
-        #
-        
+        normal = (location - self.origin).norm()  
         return normal
 
 #
@@ -70,11 +79,11 @@ class PhongLight(Light):
     # and brightness that the point is illuminated to by
     # this light (each colour channel should be 0-1)
     def illumination(self, renderable, location, renderer):
-        #
-        # ! implement this
-        #
-        
-        return vec3(0,1,0)
+       	norm = renderable.normal(location)       
+       	direct = self.position - location;
+       	direct = direct.norm();
+       	
+        return max(0, direct.dot(norm)) * self.specular
 
 #
 #   Renderer
@@ -141,8 +150,8 @@ if __name__ == '__main__':
     #   Scene is described here
     #
 
-    width = 2**7
-    height = 2**7
+    width = 2**8
+    height = 2**8
 
     img = Image.new( 'RGB', (width,height), "black")
     pixels = img.load()
@@ -152,7 +161,7 @@ if __name__ == '__main__':
         PhongLight(vec3(0.5,-1,3.5), vec3(0,0,1), vec3(0,0,1))
     ]
     renderer.renderables = [
-        # ! add some renderables here
+        Sphere(vec3(1,1,1),1)
     ]
 
     for i in range(img.size[0]):
