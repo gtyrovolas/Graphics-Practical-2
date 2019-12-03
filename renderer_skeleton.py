@@ -51,6 +51,22 @@ class Sphere(Renderable):
         normal = (location - self.origin).norm()  
         return normal
 
+class Triangle(Renderable):
+    # Should return a RayIntersection for the intersection between
+    # the ray from origin with direction
+    def __init__(self, v1, v2, v3):
+    	self.v1 = v1
+    	self.v2 = v2
+    	self.v3 = v3    	
+    	self.normal = (self.v2 - self.v1).cross(self.v3 - self.v3).norm()
+
+    def intersect(self, origin, direction): 
+    	if(self.direction)
+
+    # Should return the normal at the given location
+    def normal(self, location):
+    	return self.normal
+
 #
 #   Lights
 #
@@ -82,7 +98,7 @@ class PhongLight(Light):
        	norm = renderable.normal(location)       
        	direct = self.position - location;
        	direct = direct.norm();
-       	
+
         return max(0, direct.dot(norm)) * self.specular
 
 #
@@ -150,8 +166,8 @@ if __name__ == '__main__':
     #   Scene is described here
     #
 
-    width = 2**8
-    height = 2**8
+    width = 2**9
+    height = 2**9
 
     img = Image.new( 'RGB', (width,height), "black")
     pixels = img.load()
@@ -161,7 +177,7 @@ if __name__ == '__main__':
         PhongLight(vec3(0.5,-1,3.5), vec3(0,0,1), vec3(0,0,1))
     ]
     renderer.renderables = [
-        Sphere(vec3(1,1,1),1)
+        Sphere(vec3(0,0,4),0.5)
     ]
 
     for i in range(img.size[0]):
