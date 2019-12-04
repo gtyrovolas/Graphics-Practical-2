@@ -58,18 +58,30 @@ class Triangle(Renderable):
     	self.v1 = v1
     	self.v2 = v2
     	self.v3 = v3    	
-    	self.normal = (self.v2 - self.v1).cross(self.v3 - self.v3).norm()
+    	self.normal_ = (self.v2 - self.v1).cross(self.v3 - self.v1).norm()
 
     def intersect(self, origin, direction): 
-    	if(direction.dot(self.normal) <= 0.00001 && direction.dot(self.normal) >= -0.00001): return None  
-    	len = - self.normal.dot(v1 - origin) / (self.normal.dot(direction))
-    	p = origin + p * direction
-    	u = v2 - v1
-    	v = v3 - v1
-    	
+    	if(direction.dot(self.normal_) <= 0.00001 and direction.dot(self.normal_) >= -0.00001): return None  
+    	len = self.normal_.dot(self.v1 - origin) / (self.normal_.dot(direction))
+    	if(len <= 0.0001): return None
+    	#print(len)
+    	p = origin + len * direction
+    	u = self.v2 - self.v1
+    	v = self.v3 - self.v1
+    	area1 = u.cross(p - self.v1).len()
+    	area2 = v.cross(p - self.v1).len()
+    	area3 = (self.v3 - self.v2).cross(p - self.v2).len()
+    	totalArea = u.cross(v).len()
+    	diff = totalArea - area1 - area2 - area3
+    	if(diff <= 0.001 and diff >= -0.001):
+    		return RayIntersection(origin, direction, self, p, len)
+    	else:
+    		return None
+		
+		
     # Should return the normal at the given location
     def normal(self, location):
-    	return self.normal
+    	return self.normal_
 
 #
 #   Lights
@@ -101,9 +113,13 @@ class PhongLight(Light):
     def illumination(self, renderable, location, renderer):
        	norm = renderable.normal(location)       
        	direct = self.position - location;
-       	direct = direct.norm();
-
-        return max(0, direct.dot(norm)) * self.specular
+        direct = direct.norm();
+        u = (location - self.position).norm()
+        v = (2*renderable.normal(location) - u).norm()
+        spec = max(0.0, (renderer.camera - location).norm().dot(v)) ** 10.0
+        diff = max(0, direct.dot(norm))
+        if(diff <= 0.0001): spec = 0.0
+        return diff * self.diffuse + spec * self.specular
 
 #
 #   Renderer
@@ -170,8 +186,8 @@ if __name__ == '__main__':
     #   Scene is described here
     #
 
-    width = 2**9
-    height = 2**9
+    width = 2**8
+    height = 2**8
 
     img = Image.new( 'RGB', (width,height), "black")
     pixels = img.load()
@@ -181,7 +197,8 @@ if __name__ == '__main__':
         PhongLight(vec3(0.5,-1,3.5), vec3(0,0,1), vec3(0,0,1))
     ]
     renderer.renderables = [
-        Sphere(vec3(0,0,4),0.5)
+        Sphere(vec3(-1,0,4),0.5),
+        Triangle(vec3(0.5,0,3), vec3(0,0.5,5), vec3(0.4,0.4,4))
     ]
 
     for i in range(img.size[0]):
